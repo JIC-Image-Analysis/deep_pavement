@@ -1,3 +1,7 @@
+import os
+
+import click
+
 from keras.models import Model, Sequential
 from keras.layers import Flatten, Input, concatenate, Conv2D, MaxPooling2D, Activation, UpSampling2D, BatchNormalization
 from keras.optimizers import RMSprop
@@ -232,7 +236,7 @@ def get_unet_256(input_shape=(256, 256, 3),
     return model
 
 
-def train_model():
+def train_model(train_data_path):
 
     data_gen_args = dict( # featurewise_center=True,
                      # featurewise_std_normalization=True,
@@ -250,12 +254,12 @@ def train_model():
     # mask_datagen.git(masks, augment=True, seed=seed)
 
     image_generator = image_datagen.flow_from_directory(
-        'tile_data/image',
+        os.path.join(train_data_path, 'image'),
         class_mode=None,
         seed=seed,
         batch_size=1000)
     mask_generator = mask_datagen.flow_from_directory(
-        'tile_data/mask',
+        os.path.join(train_data_path, 'mask'),
         color_mode='grayscale',
         class_mode=None,
         seed=seed,
@@ -290,11 +294,13 @@ def train_model():
 #
 #    model.save('unet256.h5')
 
-def main():
+@click.command()
+@click.argument('train_data_path')
+def main(train_data_path):
 
     # model = get_unet_256()
     # model.summary()
-    train_model()
+    train_model(train_data_path)
 
 
 if __name__ == '__main__':
