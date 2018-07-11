@@ -159,7 +159,7 @@ def get_unet_256(input_shape=(256, 256, 3),
     # center
 
     up4 = UpSampling2D((2, 2))(center)
-    # up4 = concatenate([down4, up4], axis=3)
+    up4 = concatenate([down4, up4], axis=3)
     up4 = Conv2D(512, (3, 3), padding='same')(up4)
     up4 = BatchNormalization()(up4)
     up4 = Activation('relu')(up4)
@@ -172,7 +172,7 @@ def get_unet_256(input_shape=(256, 256, 3),
     # 16
 
     up3 = UpSampling2D((2, 2))(up4)
-    # up3 = concatenate([down3, up3], axis=3)
+    up3 = concatenate([down3, up3], axis=3)
     up3 = Conv2D(256, (3, 3), padding='same')(up3)
     up3 = BatchNormalization()(up3)
     up3 = Activation('relu')(up3)
@@ -185,7 +185,7 @@ def get_unet_256(input_shape=(256, 256, 3),
     # 32
 
     up2 = UpSampling2D((2, 2))(up3)
-    # up2 = concatenate([down2, up2], axis=3)
+    up2 = concatenate([down2, up2], axis=3)
     up2 = Conv2D(128, (3, 3), padding='same')(up2)
     up2 = BatchNormalization()(up2)
     up2 = Activation('relu')(up2)
@@ -198,7 +198,7 @@ def get_unet_256(input_shape=(256, 256, 3),
     # 64
 
     up1 = UpSampling2D((2, 2))(up2)
-    # up1 = concatenate([down1, up1], axis=3)
+    up1 = concatenate([down1, up1], axis=3)
     up1 = Conv2D(64, (3, 3), padding='same')(up1)
     up1 = BatchNormalization()(up1)
     up1 = Activation('relu')(up1)
@@ -211,7 +211,7 @@ def get_unet_256(input_shape=(256, 256, 3),
     # 128
 
     up0 = UpSampling2D((2, 2))(up1)
-    # up0 = concatenate([down0, up0], axis=3)
+    up0 = concatenate([down0, up0], axis=3)
     up0 = Conv2D(32, (3, 3), padding='same')(up0)
     up0 = BatchNormalization()(up0)
     up0 = Activation('relu')(up0)
@@ -253,13 +253,13 @@ def train_model():
         'tile_data/image',
         class_mode=None,
         seed=seed,
-        batch_size=32)
+        batch_size=1000)
     mask_generator = mask_datagen.flow_from_directory(
         'tile_data/mask',
         color_mode='grayscale',
         class_mode=None,
         seed=seed,
-        batch_size=32)
+        batch_size=1000)
 
 
     # result = image_generator.next()
@@ -269,17 +269,26 @@ def train_model():
     # imsave('sample.png', result[1])
     # imsave('mask_sample.png', mask_result[1])
 
-    train_generator = zip(image_generator, mask_generator)
-
+    x_train = image_generator.next()
+    y_train = mask_generator.next()
+#
     model = get_unet_256()
-    model.fit_generator(
-        train_generator,
-        steps_per_epoch=2000,
-        epochs=10,
-        verbose=1
-    )
-
+    model.fit(x_train, y_train, batch_size=4, epochs=20, verbose=1)
+#
     model.save('unet256.h5')
+
+
+#    train_generator = zip(image_generator, mask_generator)
+#
+#    model = get_unet_256()
+#    model.fit_generator(
+#        train_generator,
+#        steps_per_epoch=1,
+#        epochs=1,
+#        verbose=1
+#    )
+#
+#    model.save('unet256.h5')
 
 def main():
 

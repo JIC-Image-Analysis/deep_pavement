@@ -6,9 +6,9 @@ import numpy as np
 import keras
 from keras.utils import np_utils
 
-from keras.models import Sequential
-from keras.layers import Dense, Dropout, Activation, Flatten
-from keras.layers import Convolution2D, MaxPooling2D
+from keras.models import Sequential, Model
+from keras.layers import Input, Dense, Dropout, Activation, Flatten
+from keras.layers import Convolution2D, Conv2D, MaxPooling2D
 
 
 from imageio import imread, imsave
@@ -120,6 +120,23 @@ def load_data_from_disk_images(base_path):
 
     return x_train, y_train
 
+def train_model_model():
+
+    x_train, y_train = load_data_from_disk_images("data/train")
+    x_test, y_test = load_data_from_disk_images("data/test")
+
+    inputs = Input((51, 51, 1))
+    conv = Conv2D(32, (3, 3), padding='same', activation='relu')(inputs)
+    flatten = Flatten()(conv)
+    dense1 = Dense(128, activation='relu')(flatten)
+    dense2 = Dense(2, activation='softmax')(dense1)
+
+    model = Model(input=inputs, output=dense2)
+
+    model.compile(loss='categorical_crossentropy', optimizer='adam', metrics=['accuracy'])
+
+    model.fit(x_train, y_train, batch_size=32, epochs=10, verbose=1)
+
 
 def train_model():
 
@@ -152,7 +169,7 @@ def train_model():
 def main():
     # load_stuff()
 
-    train_model()
+    train_model_model()
 
 
 if __name__ == '__main__':

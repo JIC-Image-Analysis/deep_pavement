@@ -12,7 +12,7 @@ from skimage.segmentation import find_boundaries
 from dtoolcore import DataSet
 
 
-DILATION_SIZE = 1
+DILATION_SIZE = 0
 
 
 def load_segmentation_from_rgb_image(filename):
@@ -36,7 +36,10 @@ def generate_dilated_boundary_image(image_fpath):
 
     boundaries = find_boundaries(segmentation)
 
-    dilated_boundaries = dilation(boundaries, disk(DILATION_SIZE))
+    if DILATION_SIZE:
+        dilated_boundaries = dilation(boundaries, disk(DILATION_SIZE))
+    else:
+        dilated_boundaries = boundaries
 
     return 255 * dilated_boundaries.astype(np.uint8)
 
